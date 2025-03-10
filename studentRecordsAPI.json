@@ -1,0 +1,139 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Student Records Portal API",
+      "version": "1.0.0",
+      "description": "API for managing student admissions."
+    },
+    "paths": {
+      "/programmes/availability/{programme_id}": {
+        "get": {
+          "summary": "Check Programme Availability",
+          "parameters": [
+            {
+              "name": "programme_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Available slots for the programme",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "programme_id": { "type": "string" },
+                      "available_slots": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admissions/confirm": {
+        "post": {
+          "summary": "Confirm Student Admission",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "student_id": { "type": "string" },
+                    "programme_id": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Admission confirmation",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": { "type": "string" },
+                      "student_id": { "type": "string" },
+                      "programme": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/students/generate_id": {
+        "post": {
+          "summary": "Generate Student ID",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "dob": { "type": "string", "format": "date" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Generated Student ID",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "student_id": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admissions/{student_id}/letter": {
+        "get": {
+          "summary": "Generate Admission Letter",
+          "parameters": [
+            {
+              "name": "student_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "PDF admission letter",
+              "content": {
+                "application/pdf": {
+                  "schema": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
