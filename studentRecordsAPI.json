@@ -1,139 +1,274 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "title": "Student Records Portal API",
-      "version": "1.0.0",
-      "description": "API for managing student admissions."
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Student Records Portal API",
+    "version": "1.0.0",
+    "description": "API for managing student admissions and records."
+  },
+  "components": {
+    "schemas": {
+      "ProgrammeAvailability": {
+        "type": "object",
+        "properties": {
+          "programme_id": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}[0-9]{3}$",
+            "example": "CSI345"
+          },
+          "available_slots": {
+            "type": "integer",
+            "minimum": 0,
+            "example": 25
+          }
+        }
+      },
+      "AdmissionRequest": {
+        "type": "object",
+        "required": ["student_id", "programme_id"],
+        "properties": {
+          "student_id": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{8}$",
+            "example": "202101609"
+          },
+          "programme_id": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}[0-9]{3}$",
+            "example": "CSI345"
+          }
+        }
+      },
+      "AdmissionConfirmation": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["confirmed", "pending", "rejected"],
+            "example": "confirmed"
+          },
+          "student_id": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{8}$",
+            "example": "202101609"
+          },
+          "programme": {
+            "type": "string",
+            "example": "CSI345 - Integrative Programming"
+          }
+        }
+      },
+      "StudentIdRequest": {
+        "type": "object",
+        "required": ["name", "dob", "omang_number"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "dob": {
+            "type": "string",
+            "format": "date",
+            "example": "1999-05-15"
+          },
+          "omang_number": {
+            "type": "string",
+            "example": "12345678"
+          }
+        }
+      },
+      "StudentIdResponse": {
+        "type": "object",
+        "properties": {
+          "student_id": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{8}$",
+            "example": "202101609"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Invalid request parameters"
+          }
+        }
+      }
     },
-    "paths": {
-      "/programmes/availability/{programme_id}": {
-        "get": {
-          "summary": "Check Programme Availability",
-          "parameters": [
-            {
-              "name": "programme_id",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type": "string"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Available slots for the programme",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "programme_id": { "type": "string" },
-                      "available_slots": { "type": "integer" }
-                    }
-                  }
-                }
-              }
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid input",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Invalid input: Programme ID must be in the format ABC123"
             }
           }
         }
       },
-      "/admissions/confirm": {
-        "post": {
-          "summary": "Confirm Student Admission",
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "student_id": { "type": "string" },
-                    "programme_id": { "type": "string" }
-                  }
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Admission confirmation",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": { "type": "string" },
-                      "student_id": { "type": "string" },
-                      "programme": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/students/generate_id": {
-        "post": {
-          "summary": "Generate Student ID",
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "dob": { "type": "string", "format": "date" }
-                  }
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Generated Student ID",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "student_id": { "type": "string" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/admissions/{student_id}/letter": {
-        "get": {
-          "summary": "Generate Admission Letter",
-          "parameters": [
-            {
-              "name": "student_id",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type": "string"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "PDF admission letter",
-              "content": {
-                "application/pdf": {
-                  "schema": {
-                    "type": "string",
-                    "format": "binary"
-                  }
-                }
-              }
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Resource not found: The specified programme or student does not exist"
             }
           }
         }
       }
     }
+  },
+  "paths": {
+    "/programmes/availability/{programme_id}": {
+      "get": {
+        "summary": "Check Programme Availability",
+        "description": "Get the number of available slots for a specific programme",
+        "parameters": [
+          {
+            "name": "programme_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}[0-9]{3}$",
+              "example": "CSI345"
+            },
+            "description": "Programme ID in format ABC123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved programme availability",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgrammeAvailability"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/admissions/confirm": {
+      "post": {
+        "summary": "Confirm Student Admission",
+        "description": "Confirms a student's admission to a specific programme",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdmissionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully confirmed admission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdmissionConfirmation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/students/generate_id": {
+      "post": {
+        "summary": "Generate Student ID",
+        "description": "Generates a new unique student ID",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudentIdRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully generated student ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentIdResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/admissions/{student_id}/letter": {
+      "get": {
+        "summary": "Generate Admission Letter",
+        "description": "Generates a PDF admission letter for a student",
+        "parameters": [
+          {
+            "name": "student_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{8}$",
+              "example": "202101609"
+            },
+            "description": "Student ID (9 digits, cannot start with 0)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully generated admission letter",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
   }
+}
